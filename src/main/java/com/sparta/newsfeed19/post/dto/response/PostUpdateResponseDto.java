@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public class PostUpdateResponseDto {
 
     private final Long id;
+//    private final UserDto user;
     private final String title;
     private final String content;
     private final LocalDateTime createdAt;
@@ -15,12 +16,17 @@ public class PostUpdateResponseDto {
 
     public PostUpdateResponseDto(
             Long id,
+//            User user,
             String title,
             String content,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
         this.id = id;
+//        this.user = new UserDto(
+//                user.getId(),
+//                user.getEmail()
+//        )
         this.title = title;
         this.content = content;
         this.createdAt = createdAt;

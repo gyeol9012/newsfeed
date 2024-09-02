@@ -20,12 +20,12 @@ public class Post extends Timestamp {
     private String title;
     private String contents;
 
-    // 게시물 만든 사람
+    // 게시물 만든 유저
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "todo", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST,CascadeType.REMOVE})
     private List<Comment> comments = new ArrayList<>();
 
     public Post(User user, String title, String contents) {

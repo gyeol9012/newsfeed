@@ -1,4 +1,4 @@
-package com.sparta.newsfeed19.post.dto.request.response;
+package com.sparta.newsfeed19.post.dto.response;
 
 import lombok.Getter;
 
@@ -8,26 +8,29 @@ import java.time.LocalDateTime;
 public class PostSaveResponseDto {
 
     private final Long id;
+//    private final UserDto user;
     private final String title;
     private final String contents;
-    private final String weather;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
     public PostSaveResponseDto(
             Long id,
+//            User user,
             String title,
             String contents,
-            String weather,
             LocalDateTime createdAt,
-            LocalDateTime updatedAt, Long id1, String title1, String contents1, String weather1, LocalDateTime createdAt1, LocalDateTime updatedAt1
+            LocalDateTime updatedAt
     ){
-        this.id = id1;
-        this.title = title1;
-        this.contents = contents1;
-        this.weather = weather1;
-        this.createdAt = createdAt1;
-        this.updatedAt = updatedAt1;
+        this.id = id;
+//        this.uesr = new UserDto(
+//                user.getId(),
+//                user.getEmail()
+//        )
+        this.title = title;
+        this.contents = contents;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
 }

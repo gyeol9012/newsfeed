@@ -1,14 +1,20 @@
 package com.sparta.newsfeed19.post;
 
+import com.sparta.newsfeed19.global.exception.ResponseCode;
+import com.sparta.newsfeed19.post.PostRepository;
 import com.sparta.newsfeed19.post.dto.response.*;
 import com.sparta.newsfeed19.post.entity.Post;
 import com.sparta.newsfeed19.user.UserRepository;
+import com.sparta.newsfeed19.user.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,28 +23,44 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
+    // 로그인한 사용자가 작성한 게시물 조회하는 메서드
+    public List<Post> getPostForCurrentUser() {
+        User currentUser = userService.getCurrentUser();
+        return postRepository.findByUser(currentUser);
+    }
+
+    // 게시글 조회 메서드
+    public PostUpdateResponseDto getPostById(long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException(ResponseCode.POST_NOT_FOUND.getMessage() + id));
+        return new PostUpdateResponseDto(post);
+    }
+
+    // 게시물 등록 메서드
     @Transactional
-    public com.sparta.newsfeed19.post.dto.request.response.PostSaveResponseDto savePost(PostSaveRequestDto postsaveRequestDto) {
-        User user = userRepository.findById(postsaveRequestDto.getUserId())
-                .orElseThrow(() -> new NullPointerException("유저를 찾을 수 없음"));
+    public PostSaveResponseDto savePost(PostSaveRequestDto postSaveRequestDto) {
+        User user = userRepository.findById(postSaveRequestDto.getUserId())
+                .orElseThrow(() -> new RuntimeException(ResponseCode.USER_NOT_FOUND.getMessage()));
 
         Post newPost = new Post(
                 user,
                 postSaveRequestDto.getTitle(),
-                postsaveRequestDto.getContents()
+                postSaveRequestDto.getContents()
         );
         postRepository.save(newPost);
-        return new PostResponseDto(post);
+        return new PostSaveResponseDto(newPost);
     }
 
+    // 게시물 다건 조회 메서드
     @Transactional(readOnly = true)
-    public Page<com.sparta.newsfeed19.post.dto.request.response.PostDetailResponseDto> getPosts(int page, int size) {
+    public Page<PostDetailResponseDto> getPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Post> posts = postRepository.findAllByOrderByModifiedAtDesc(pageable);
+        Page<Post> posts = postRepository.findAllByOrderByCreatedAtDesc(pageable);
 
-        return posts.map(post -> new com.sparta.newsfeed19.post.dto.request.response.PostDetailResponseDto(
+        return posts.map(post -> new PostDetailResponseDto(
                 post.getId(),
                 post.getUser(),
                 post.getTitle(),
@@ -49,10 +71,11 @@ public class PostService {
         ));
     }
 
+    // 게시물 단건 조회 메서드
     @Transactional(readOnly = true)
-    public PostSimpleResponseDto getTodo(Long postId) {
-
-        Post post = postRepository.findById(postId).orElseThrow(() -> new NullPointerException("게시글을 찾을 수 없습니다."));
+    public PostSimpleResponseDto getPost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException(ResponseCode.POST_NOT_FOUND.getMessage() + postId));
 
         return new PostSimpleResponseDto(
                 post.getId(),
@@ -63,15 +86,16 @@ public class PostService {
         );
     }
 
+    // 게시물 수정 메서드
     @Transactional
     public PostUpdateResponseDto updatePost(Long postId, PostUpdateRequestDto postUpdateRequestDto) {
-
-        Post post = postRepository.findById(postId).orElseThrow(() -> new NullPointerException("게시글을 찾을 수 없습니다."));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException(ResponseCode.POST_NOT_FOUND.getMessage() + postId));
         User user = userRepository.findById(postUpdateRequestDto.getUserId())
-                .orElseThrow(() -> new NullPointerException("유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException(ResponseCode.USER_NOT_FOUND.getMessage()));
 
         // 작성자 일치 여부 null-safe 비교
-        if (post.getUser() == null || !ObjectUtils.nullSafeEquals(user.getId(), post.getUser().getId())) {
+        if (!ObjectUtils.nullSafeEquals(user.getId(), post.getUser().getId())) {
             throw new IllegalArgumentException("작성자가 일치하지 않습니다.");
         }
 
@@ -80,7 +104,7 @@ public class PostService {
                 postUpdateRequestDto.getContents()
         );
 
-        return new postUpdateResponseDto(
+        return new PostUpdateResponseDto(
                 post.getId(),
                 post.getUser(),
                 post.getTitle(),
@@ -90,8 +114,19 @@ public class PostService {
         );
     }
 
+    // 게시물 삭제 메서드
     @Transactional
     public void deletePost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException(ResponseCode.POST_NOT_FOUND.getMessage() + postId));
+
+        User currentUser = userService.getCurrentUser();
+
+        // 작성자 일치 여부 null-safe 비교
+        if (!ObjectUtils.nullSafeEquals(currentUser.getId(), post.getUser().getId())) {
+            throw new IllegalArgumentException("작성자가 일치하지 않습니다.");
+        }
+
         postRepository.deleteById(postId);
     }
 }
