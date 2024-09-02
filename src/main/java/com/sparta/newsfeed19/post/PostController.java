@@ -1,30 +1,45 @@
 package com.sparta.newsfeed19.post;
 
-import com.sparta.newsfeed19.post.postdto.PostRequsetDto;
-import com.sparta.newsfeed19.post.postdto.PostResponseDto;
-import com.sparta.newsfeed19.user.UserRepository;
+import com.sparta.newsfeed19.post.dto.request.*;
+import com.sparta.newsfeed19.post.dto.response.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-//@RestController
-//@RequestMapping("/feat/post")
-//@RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/post")
+@RequiredArgsConstructor
 public class PostController {
 
-//    private final PostRepository postRepository;
-//    private final PostService postService;
-//    private final UserRepository userRepository;
-//
-//    @PostMapping
-//    public ResponseEntity<PostResponseDto> createPost(@RequestBody PostRequsetDto requsetDto){
-//        PostResponseDto responseDto = postService.createPost(requsetDto);
-//        responseDto new ResponseEntity<>(responseDto, HttpStatus.CREATED);
-//    }
-//
-//    @GetMapping("/all")
-//    public ResponseEntity<>
+    private final PostService postService;
+
+    @PostMapping
+    public ResponseEntity<PostSaveResponseDto> savePost(@RequestBody PostSaveRequsetDto requsetDto){
+        return ResponseEntity.ok(postService.savePost(postSaveRequestDto));
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<PostDetailResponseDto>> getPosts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size){
+        return ResponseEntity.ok(postService.getPosts(page, size));
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostSimpleResponseDto> getPost(@PathVariable Long postId){
+        return ResponseEntity.ok(postService.getPost(postId));
+    }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<PostUpdateResponseDto> updatePost(
+            @PathVariable Long postId,
+            @RequestBody PostUpdateRequestDto postUpdateRequestDto){
+        return ResponseEntity.ok(postService.updatePost(postId, postUpdateRequestDto));
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(@PathVariable Long postId){
+        postService.deletePost(postId);
+        return ResponseEntity.ok().build();
+    }
 }
