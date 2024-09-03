@@ -6,9 +6,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-
 @Getter
 @Entity
 @Table(name = "post")
@@ -19,7 +16,6 @@ public class Post extends TimeStamp {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
     private Long id;
-
     private String title;
     private String contents;
 

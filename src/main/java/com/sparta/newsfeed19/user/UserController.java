@@ -2,6 +2,8 @@ package com.sparta.newsfeed19.user;
 
 import com.sparta.newsfeed19.user.dto.LoginRequestDto;
 import com.sparta.newsfeed19.user.dto.LoginResponseDto;
+import com.sparta.newsfeed19.user.dto.SaveUserRequestDto;
+import com.sparta.newsfeed19.user.dto.SaveUserResponseDto;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ public class UserController {
     public ResponseEntity<SaveUserResponseDto> saveUser(@RequestBody SaveUserRequestDto saveUserRequestDto, HttpServletResponse response) {
         return ResponseEntity.ok(userService.saveUser(saveUserRequestDto));
     }
+
     @PostMapping("/users/login")
     public String login(LoginRequestDto requestDto, HttpServletResponse res) {
         try {

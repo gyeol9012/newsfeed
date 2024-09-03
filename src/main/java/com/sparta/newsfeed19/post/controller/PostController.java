@@ -22,7 +22,7 @@ public class PostController {
     }
 
     // 게시물 조회 (다건, 페이지네이션 1페이지 당 10개의 데이터가 들어있음)
-    @GetMapping
+    @GetMapping("/page")
     public ResponseEntity<Page<PostDetailResponseDto>> getPosts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -31,7 +31,7 @@ public class PostController {
 
     // 게시물 조회 단건
     @GetMapping("/{postId}")
-    public ResponseEntity<PostSimpleResponseDto> getPost(@PathVariable Long postId) {
+    public ResponseEntity<PostSimpleResponseDto> getPost(@PathVariable("postId") Long postId) {
         return ResponseEntity.ok(postService.getPost(postId));
     }
 

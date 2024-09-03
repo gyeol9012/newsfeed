@@ -1,5 +1,6 @@
 package com.sparta.newsfeed19.post.service;
 
+import com.sparta.newsfeed19.global.exception.ApiException;
 import com.sparta.newsfeed19.global.exception.ResponseCode;
 
 import com.sparta.newsfeed19.post.dto.request.*;
@@ -9,7 +10,6 @@ import com.sparta.newsfeed19.post.entity.Post;
 import com.sparta.newsfeed19.post.repository.PostRepository;
 import com.sparta.newsfeed19.user.User;
 import com.sparta.newsfeed19.user.UserRepository;
-import com.sparta.newsfeed19.user.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,9 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import java.util.List;
-
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -28,20 +25,26 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final UserService userService;
 
     // 게시물 등록 메서드
     @Transactional
     public PostSaveResponseDto savePost(PostSaveRequestDto postSaveRequestDto) {
-        User user = userRepository.findById(postSaveRequestDto.getUserId())
-                .orElseThrow(() -> new RuntimeException(ResponseCode.USER_NOT_FOUND.getMessage()));
 
+        // User 엔티티를 가져오는 부분 확인
+        User user = userRepository.findById(postSaveRequestDto.getUserId())
+                .orElseThrow(() -> new ApiException(ResponseCode.USER_NOT_FOUND));
+
+        System.out.println("User ID from request DTO: " + postSaveRequestDto.getUserId());
+        System.out.println("Fetched User: " + user);
+        // Post 엔티티 생성 및 저장
         Post newPost = new Post(
                 user,
                 postSaveRequestDto.getTitle(),
                 postSaveRequestDto.getContents()
         );
        Post savePost = postRepository.save(newPost);
+
+       // PostSaveResponseDto 생성 시 UserDto로 전환
         return new PostSaveResponseDto(
                 savePost.getId(),
                 user,
@@ -55,6 +58,16 @@ public class PostService {
     // 게시물 다건 조회 메서드
     @Transactional
     public Page<PostDetailResponseDto> getPosts(int page, int size) {
+        // 페이지 번호가 1보다 작다면 기본값 1로 설정
+        if (page < 1) {
+            page = 1;
+        }
+
+        // 페이지 크기가 1보다 작다면 기본값 10으로 설정
+        if (size < 1) {
+            size = 10;
+        }
+        
         Pageable pageable = PageRequest.of(page - 1, size);
 
         Page<Post> posts = postRepository.findAllByOrderByCreatedAtDesc(pageable);
@@ -73,7 +86,7 @@ public class PostService {
     @Transactional
     public PostSimpleResponseDto getPost(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException(ResponseCode.POST_NOT_FOUND.getMessage() + postId));
+                .orElseThrow(() -> new ApiException(ResponseCode.POST_NOT_FOUND));
 
         return new PostSimpleResponseDto(
                 post.getId(),
@@ -88,9 +101,9 @@ public class PostService {
     @Transactional
     public PostUpdateResponseDto updatePost(Long postId, PostUpdateRequestDto postUpdateRequestDto) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException(ResponseCode.POST_NOT_FOUND.getMessage() + postId));
+                .orElseThrow(() -> new ApiException(ResponseCode.POST_NOT_FOUND));
         User user = userRepository.findById(postUpdateRequestDto.getUserId())
-                .orElseThrow(() -> new RuntimeException(ResponseCode.USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new ApiException(ResponseCode.USER_NOT_FOUND));
 
         // 작성자 일치 여부 null-safe 비교
         if (!ObjectUtils.nullSafeEquals(user.getId(), post.getUser().getId())) {
@@ -116,7 +129,7 @@ public class PostService {
     @Transactional
     public void deletePost(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException(ResponseCode.POST_NOT_FOUND.getMessage() + postId));
+                .orElseThrow(() -> new ApiException(ResponseCode.POST_NOT_FOUND));
 
 //        User currentUser = userService.getCurrentUser();
 //
