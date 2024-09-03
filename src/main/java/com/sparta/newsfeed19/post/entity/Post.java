@@ -1,5 +1,6 @@
 package com.sparta.newsfeed19.post.entity;
 
+import com.sparta.newsfeed19.baseentity.TimeStamp;
 import com.sparta.newsfeed19.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 @Entity
 @Table(name = "post")
 @NoArgsConstructor
-public class Post extends Timestamp {
+public class Post extends TimeStamp {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,8 +28,8 @@ public class Post extends Timestamp {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST,CascadeType.REMOVE})
-    private List<Comment> comments = new ArrayList<>();
+//    @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST,CascadeType.REMOVE})
+//    private List<Comment> comments = new ArrayList<>();
 
     public Post(User user, String title, String contents) {
         this.user = user;

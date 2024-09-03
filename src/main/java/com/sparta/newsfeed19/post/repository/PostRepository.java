@@ -1,4 +1,4 @@
-package com.sparta.newsfeed19.post;
+package com.sparta.newsfeed19.post.repository;
 
 import com.sparta.newsfeed19.post.entity.Post;
 import com.sparta.newsfeed19.user.User;

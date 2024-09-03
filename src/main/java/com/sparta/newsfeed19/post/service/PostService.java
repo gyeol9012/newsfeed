@@ -1,10 +1,12 @@
-package com.sparta.newsfeed19.post;
+package com.sparta.newsfeed19.post.service;
 
 import com.sparta.newsfeed19.global.exception.ResponseCode;
 
 import com.sparta.newsfeed19.post.dto.request.*;
 import com.sparta.newsfeed19.post.dto.response.*;
 
+import com.sparta.newsfeed19.post.entity.Post;
+import com.sparta.newsfeed19.post.repository.PostRepository;
 import com.sparta.newsfeed19.user.User;
 import com.sparta.newsfeed19.user.UserRepository;
 import com.sparta.newsfeed19.user.UserService;
@@ -16,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -25,19 +29,6 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final UserService userService;
-
-    // 로그인한 사용자가 작성한 게시물 조회하는 메서드
-    public List<Post> getPostForCurrentUser() {
-        User currentUser = userService.getCurrentUser();
-        return postRepository.findByUser(currentUser);
-    }
-
-    // 게시글 조회 메서드
-    public PostUpdateResponseDto getPostById(long id) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException(ResponseCode.POST_NOT_FOUND.getMessage() + id));
-        return new PostUpdateResponseDto(post);
-    }
 
     // 게시물 등록 메서드
     @Transactional
@@ -50,12 +41,19 @@ public class PostService {
                 postSaveRequestDto.getTitle(),
                 postSaveRequestDto.getContents()
         );
-        postRepository.save(newPost);
-        return new PostSaveResponseDto(newPost);
+       Post savePost = postRepository.save(newPost);
+        return new PostSaveResponseDto(
+                savePost.getId(),
+                user,
+                savePost.getTitle(),
+                savePost.getContents(),
+                savePost.getCreatedAt(),
+                savePost.getUpdatedAt()
+        );
     }
 
     // 게시물 다건 조회 메서드
-    @Transactional(readOnly = true)
+    @Transactional
     public Page<PostDetailResponseDto> getPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
@@ -66,14 +64,13 @@ public class PostService {
                 post.getUser(),
                 post.getTitle(),
                 post.getContents(),
-                post.getComments().size(),
                 post.getCreatedAt(),
                 post.getUpdatedAt()
         ));
     }
 
     // 게시물 단건 조회 메서드
-    @Transactional(readOnly = true)
+    @Transactional
     public PostSimpleResponseDto getPost(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException(ResponseCode.POST_NOT_FOUND.getMessage() + postId));
@@ -121,12 +118,12 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException(ResponseCode.POST_NOT_FOUND.getMessage() + postId));
 
-        User currentUser = userService.getCurrentUser();
-
-        // 작성자 일치 여부 null-safe 비교
-        if (!ObjectUtils.nullSafeEquals(currentUser.getId(), post.getUser().getId())) {
-            throw new IllegalArgumentException("작성자가 일치하지 않습니다.");
-        }
+//        User currentUser = userService.getCurrentUser();
+//
+//        // 작성자 일치 여부 null-safe 비교
+//        if (!ObjectUtils.nullSafeEquals(currentUser.getId(), post.getUser().getId())) {
+//            throw new IllegalArgumentException("작성자가 일치하지 않습니다.");
+//        }
 
         postRepository.deleteById(postId);
     }

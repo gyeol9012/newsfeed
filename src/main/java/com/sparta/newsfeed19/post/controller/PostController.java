@@ -1,5 +1,6 @@
-package com.sparta.newsfeed19.post;
+package com.sparta.newsfeed19.post.controller;
 
+import com.sparta.newsfeed19.post.service.PostService;
 import com.sparta.newsfeed19.post.dto.request.*;
 import com.sparta.newsfeed19.post.dto.response.*;
 import lombok.RequiredArgsConstructor;
