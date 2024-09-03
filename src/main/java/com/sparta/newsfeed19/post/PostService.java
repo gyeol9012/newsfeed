@@ -1,9 +1,11 @@
 package com.sparta.newsfeed19.post;
 
 import com.sparta.newsfeed19.global.exception.ResponseCode;
-import com.sparta.newsfeed19.post.PostRepository;
+
+import com.sparta.newsfeed19.post.dto.request.*;
 import com.sparta.newsfeed19.post.dto.response.*;
-import com.sparta.newsfeed19.post.entity.Post;
+
+import com.sparta.newsfeed19.user.User;
 import com.sparta.newsfeed19.user.UserRepository;
 import com.sparta.newsfeed19.user.UserService;
 import jakarta.transaction.Transactional;
@@ -14,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

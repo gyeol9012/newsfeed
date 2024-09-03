@@ -1,5 +1,6 @@
 package com.sparta.newsfeed19.post.entity;
 
+import com.sparta.newsfeed19.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 
 @Getter
 @Entity
+@Table(name = "post")
 @NoArgsConstructor
 public class Post extends Timestamp {
 
