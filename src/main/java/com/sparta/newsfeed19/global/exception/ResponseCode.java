@@ -10,8 +10,10 @@ public enum ResponseCode {
     INVALID_REQUEST("잘못된 요청입니다.", HttpStatus.BAD_REQUEST),
 
     // 사용자 응답 코드
+    NOT_FOUND_USER("존재하지 않는 사용자입니다.", HttpStatus.NOT_FOUND),
 
     // 게시물 응답 코드
+    NOT_FOUND_POST("존재하지 않는 게시물입니다.", HttpStatus.NOT_FOUND),
 
     // 댓글 응답 코드
 
